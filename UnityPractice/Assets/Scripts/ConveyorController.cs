@@ -7,6 +7,7 @@ using System.Collections.Generic;
 /// </summary>
 public class ConveyorController : MonoBehaviour
 {
+
     [Header("컨베이어 설정")]
     public Transform product; // 이동시킬 제품
     public float speed = 1.0f; // 기본 속도
@@ -37,6 +38,8 @@ public class ConveyorController : MonoBehaviour
     
     private List<Vector3> trajectoryPoints = new List<Vector3>(); // 궤적 포인트들
 
+    private Color productOriginalColor;
+
     // 움직임 패턴 열거형
     public enum MovementPattern
     {
@@ -49,6 +52,13 @@ public class ConveyorController : MonoBehaviour
 
     private void Start()
     {
+        if (product != null)
+        {
+            Renderer renderer = product.GetComponent<Renderer>();
+            if (renderer != null)
+                productOriginalColor = renderer.material.color; // 시작할 때 색상 저장
+        }
+
         Debug.Log("SimpleConveyorController 시작!");
         Debug.Log("Inspector에서 isRunning을 체크하면 제품이 움직입니다.");
     }
@@ -226,7 +236,13 @@ public class ConveyorController : MonoBehaviour
         {
             // Empty GameObject의 위치로 제품 이동
             product.position = startPosition.position;
-            Debug.Log("제품 위치 초기화!");
+
+            // 색상 복구
+            Renderer renderer = product.GetComponent<Renderer>();
+            if (renderer != null)
+                renderer.material.color = productOriginalColor; // 원래 색상으로 복구
+
+            Debug.Log("제품 위치 및 색상 초기화!");
         }
         else
         {
@@ -286,4 +302,5 @@ public class ConveyorController : MonoBehaviour
         trajectoryPoints.Clear();
         Debug.Log("궤적이 초기화되었습니다.");
     }
+
 }
