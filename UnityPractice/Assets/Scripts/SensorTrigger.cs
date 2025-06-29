@@ -18,8 +18,6 @@ public class SensorTrigger : MonoBehaviour
             if (renderer != null)
                 renderer.material.color = Color.red; // 원하는 색상으로 변경
 
-            if (conveyorController != null)
-                conveyorController.isRunning = false;
         }
     }
 }
