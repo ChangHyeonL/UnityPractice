@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 
 class Program
 {
@@ -15,24 +16,28 @@ class Program
         while (true)
         {
             TcpClient client = server.AcceptTcpClient();
-            NetworkStream stream = client.GetStream();
+            Console.WriteLine("클라이언트 연결됨!");
 
-            byte[] buffer = new byte[1024];
-            int bytesRead = stream.Read(buffer, 0, buffer.Length);
-            string message = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
+            // 클라이언트와 통신을 별도 스레드에서 처리
+            new Thread(() =>
+            {
 
-            Console.WriteLine("수신: " + message);
+                NetworkStream stream = client.GetStream();
 
-            // 예시: 받은 메시지에 따라 응답
-            string response = "OK";
-            if (message == "hello") response = "안녕 Unity!";
-            if (message == "stop") response = "정지 명령 수신!";
-            if (message.StartsWith("speed: ")) response = "속도 변경: " + message.Substring(6);
+                // 1. 클라이언트로부터 명령 수신
+                byte[] buffer = new byte[1024];
+                int bytesRead = stream.Read(buffer, 0, buffer.Length);
+                string message = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
+                Console.WriteLine("수신: " + message);
 
-            byte[] responseBytes = Encoding.UTF8.GetBytes(response);
-            stream.Write(responseBytes, 0, responseBytes.Length);
+                // 2. 서버에서 클라이언트로 메시지 전송 (예: 3초 후)
+                Thread.Sleep(3000);
+                string serverMsg = "서버에서 Unity로: Hello!";
+                byte[] serverMsgBytes = Encoding.UTF8.GetBytes(serverMsg);
+                stream.Write(serverMsgBytes, 0, serverMsgBytes.Length);
 
-            client.Close();
+                client.Close();
+            }).Start();
         }
     }
 }
